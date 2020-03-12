@@ -1,0 +1,6 @@
+aiohttp
+asyncio
+botbuilder-core>=4.7.1
+botbuilder-dialogs>=4.7.1
+flask>=1.0.3
+requests>=2.22.0
