@@ -30,9 +30,8 @@ async def on_error(context: TurnContext, exception: Exception):
 
     # Send a message to the user
     await context.send_activity("The bot encountered an error or bug.")
-    await context.send_activity(
-        "To continue to run this bot, please fix the bot source code."
-    )
+    await context.send_activity("To continue to run this bot, please fix the bot source code.")
+
     # Send a trace activity if we're talking to the Bot Framework Emulator
     if context.activity.channel_id == "emulator":
         # Create a trace activity that contains the error object
@@ -53,17 +52,21 @@ ADAPTER.on_turn_error = on_error
 # Create the Bot
 BOT = EchoBot()
 
+AUTHORIZATION_HEADER = "Authorization"
+CONTENT_TYPE_HEADER = "Content-Type"
+JSON_CONTENT_TYPE = "application/json"
+
 
 # Listen for incoming requests on /api/messages
 async def messages(req: Request) -> Response:
     # Main bot message handler.
-    if "application/json" in req.headers["Content-Type"]:
+    if JSON_CONTENT_TYPE in req.headers[CONTENT_TYPE_HEADER]:
         body = await req.json()
     else:
         return Response(status=415)
 
     activity = Activity().deserialize(body)
-    auth_header = req.headers["Authorization"] if "Authorization" in req.headers else ""
+    auth_header = req.headers[AUTHORIZATION_HEADER] if AUTHORIZATION_HEADER in req.headers else ""
 
     try:
         await ADAPTER.process_activity(activity, auth_header, BOT.on_turn)

@@ -2,12 +2,16 @@ from botbuilder.core import ActivityHandler, MessageFactory, TurnContext
 from botbuilder.schema import Activity, ActivityTypes, EndOfConversationCodes
 
 
+END_TEXT = "end"
+EXIT_TEXT = "exit"
+
+
 class EchoBot(ActivityHandler):
     """ EchoBot activity handler"""
 
     async def on_message_activity(self, turn_context: TurnContext):
         activity_text: str = turn_context.activity.text
-        if "end" in activity_text or "exit" in activity_text:
+        if EXIT_TEXT in activity_text or END_TEXT in activity_text:
             # Send End of conversation at the end.
             await turn_context.send_activity(
                 MessageFactory.text("Ending conversation from the skill...")
@@ -22,6 +26,6 @@ class EchoBot(ActivityHandler):
             )
             await turn_context.send_activity(
                 MessageFactory.text(
-                    f'Say "end" or "exit" and I\'ll end the conversation and back to the parent.'
+                    f'Say {END_TEXT} or {EXIT_TEXT} and I\'ll end the conversation.'
                 )
             )
