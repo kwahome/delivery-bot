@@ -1,56 +1,35 @@
-import sys
-from datetime import datetime
-
+from adapters import Adapter
 from aiohttp import web
 from aiohttp.web import Request, Response
 from botbuilder.core import (
     BotFrameworkAdapterSettings,
-    TurnContext,
-    BotFrameworkAdapter,
+    ConversationState,
+    MemoryStorage,
+    UserState
 )
-from botbuilder.schema import Activity, ActivityTypes
-
-from bots import EchoBot
+from botbuilder.schema import Activity
+from bots import MovieBot
 from config import DefaultConfig
+from dialogs import MovieDialog
+from recognizers import MovieRecognizer
 
 CONFIG = DefaultConfig()
 
+SETTINGS = BotFrameworkAdapterSettings(CONFIG.APP_ID, CONFIG.APP_PASSWORD)
+
+# Create MemoryStorage, UserState and ConversationState
+MEMORY = MemoryStorage()
+USER_STATE = UserState(MEMORY)
+CONVERSATION_STATE = ConversationState(MEMORY)
+
 # Create adapter.
 # See https://aka.ms/about-bot-adapter to learn more about how bots work.
-SETTINGS = BotFrameworkAdapterSettings(CONFIG.APP_ID, CONFIG.APP_PASSWORD)
-ADAPTER = BotFrameworkAdapter(SETTINGS)
+ADAPTER = Adapter(SETTINGS, CONVERSATION_STATE)
 
-
-# Catch-all for errors.
-async def on_error(context: TurnContext, exception: Exception):
-    # This check writes out errors to console log .vs. app insights.
-    # NOTE: In production environment, you should consider logging this to Azure
-    #       application insights.
-    print(f"\n [on_turn_error] unhandled error: {exception}", file=sys.stderr)
-
-    # Send a message to the user
-    await context.send_activity("The bot encountered an error or bug.")
-    await context.send_activity("To continue to run this bot, please fix the bot source code.")
-
-    # Send a trace activity if we're talking to the Bot Framework Emulator
-    if context.activity.channel_id == "emulator":
-        # Create a trace activity that contains the error object
-        trace_activity = Activity(
-            label="TurnError",
-            name="on_turn_error Trace",
-            timestamp=datetime.utcnow(),
-            type=ActivityTypes.trace,
-            value=f"{exception}",
-            value_type="https://www.botframework.com/schemas/error",
-        )
-        # Send a trace activity, which will be displayed in Bot Framework Emulator
-        await context.send_activity(trace_activity)
-
-
-ADAPTER.on_turn_error = on_error
-
-# Create the Bot
-BOT = EchoBot()
+# Create dialogs and Bot
+RECOGNIZER = MovieRecognizer(CONFIG.LUIS_APP_ID, CONFIG.LUIS_API_KEY, CONFIG.LUIS_API_HOST_NAME)
+DIALOG = MovieDialog(luis_recognizer=RECOGNIZER)
+BOT = MovieBot(CONVERSATION_STATE, USER_STATE, DIALOG)
 
 AUTHORIZATION_HEADER = "Authorization"
 CONTENT_TYPE_HEADER = "Content-Type"
