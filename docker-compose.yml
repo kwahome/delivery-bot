@@ -1,7 +1,9 @@
-version: '3'
+version: '3.4'
 services:
   app:
-    build: .
+    build:
+      context: .
+      network: host
     command:  bash -c "./bin/start.sh"
     volumes:
       - .:/usr/src/app

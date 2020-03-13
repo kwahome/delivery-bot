@@ -1,3 +1,3 @@
-from .echo_bot import EchoBot
+from .movie_bot import MovieBot
 
-__all__ = ["EchoBot"]
+__all__ = ["MovieBot"]

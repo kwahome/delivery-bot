@@ -1,6 +1,7 @@
 aiohttp
 asyncio
+botbuilder-ai>=4.7.1
 botbuilder-core>=4.7.1
 botbuilder-dialogs>=4.7.1
 flask>=1.0.3
-requests>=2.22.0
+requests==2.22.0
