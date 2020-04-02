@@ -15,3 +15,9 @@ class DefaultConfig:
     LUIS_API_KEY = os.environ.get("LUIS_API_KEY", "")
     # LUIS endpoint host name, ie "westus.api.cognitive.microsoft.com"
     LUIS_API_HOST_NAME = os.environ.get("LUIS_API_HOST_NAME", "westus.api.cognitive.microsoft.com")
+
+    # cosmos storage
+    COSMOS_DB_SERVICE_ENDPOINT = os.environ.get("COSMOS_DB_SERVICE_ENDPOINT", "")
+    COSMOS_DB_KEY = os.environ.get("COSMOS_DB_KEY", "")
+    COSMOS_DB_DATABASE_ID = os.environ.get("COSMOS_DB_DATABASE_ID", "")
+    COSMOS_DB_CONTAINER_ID = os.environ.get("COSMOS_DB_CONTAINER_ID", "")

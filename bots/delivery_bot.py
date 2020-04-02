@@ -11,31 +11,31 @@ from typing import List
 
 
 DIALOG_STATE = "DialogState"
-MOVIES_HISTORY = "MoviesHistory"
+DELIVERIES_HISTORY = "DeliveryHistory"
 
 
-class MovieBot(ActivityHandler):
-    """ EchoBot activity handler"""
+class DeliveryBot(ActivityHandler):
+    """ DeliveryBot activity handler"""
 
     def __init__(
             self,
             conversation_state: ConversationState,
-            user_state: UserState,
             dialog: Dialog,
+            user_state: UserState,
     ):
         if conversation_state is None:
             raise Exception(
-                "[DialogBot]: Missing parameter. conversation_state is required"
+                "[DeliveryBot]: Missing parameter. conversation_state is required"
             )
         if user_state is None:
-            raise Exception("[DialogBot]: Missing parameter. user_state is required")
+            raise Exception("[DeliveryBot]: Missing parameter. user_state is required")
         if dialog is None:
-            raise Exception("[DialogBot]: Missing parameter. dialog is required")
+            raise Exception("[DeliveryBot]: Missing parameter. dialog is required")
 
         self.conversation_state = conversation_state
-        self.user_state = user_state
         self.dialog = dialog
-        self.history_accessor = self.user_state.create_property(MOVIES_HISTORY)
+        self.user_state = user_state
+        self.user_state_accessor = self.user_state.create_property(DELIVERIES_HISTORY)
 
     async def on_turn(self, turn_context: TurnContext):
         await super().on_turn(turn_context)
@@ -57,7 +57,7 @@ class MovieBot(ActivityHandler):
         for member in members_added:
             if member.id != turn_context.activity.recipient.id:
                 await turn_context.send_activity(
-                    "Hello there! I'm the MovieBot."
+                    "Hello there! I'm the Deliveries-Bot."
                 )
         return await DialogHelper.run_dialog(
             self.dialog,

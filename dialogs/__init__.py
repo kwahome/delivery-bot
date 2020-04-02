@@ -1,3 +1,3 @@
-from .movie_dialog import MovieDialog
+from .delivery_dialog import DeliveryDialog
 
-__all__ = ["MovieDialog"]
+__all__ = ["DeliveryDialog"]
