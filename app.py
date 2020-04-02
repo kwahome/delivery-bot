@@ -1,6 +1,7 @@
 from adapters import Adapter
 from aiohttp import web
 from aiohttp.web import Request, Response
+# from botbuilder.azure import CosmosDbStorage, CosmosDbConfig
 from botbuilder.core import (
     BotFrameworkAdapterSettings,
     ConversationState,
@@ -8,9 +9,9 @@ from botbuilder.core import (
     UserState
 )
 from botbuilder.schema import Activity
-from bots import MovieBot
+from bots import DeliveryBot
 from config import DefaultConfig
-from dialogs import MovieDialog
+from dialogs import DeliveryDialog
 from recognizers import MovieRecognizer
 
 CONFIG = DefaultConfig()
@@ -18,6 +19,13 @@ CONFIG = DefaultConfig()
 SETTINGS = BotFrameworkAdapterSettings(CONFIG.APP_ID, CONFIG.APP_PASSWORD)
 
 # Create MemoryStorage, UserState and ConversationState
+# COSMOS_DB_CONFIG = CosmosDbConfig(
+#     endpoint=CONFIG.COSMOS_DB_SERVICE_ENDPOINT,
+#     masterkey=CONFIG.COSMOS_DB_KEY,
+#     database=CONFIG.COSMOS_DB_DATABASE_ID,
+#     container=CONFIG.COSMOS_DB_CONTAINER_ID
+# )
+# MEMORY = CosmosDbStorage(COSMOS_DB_CONFIG)
 MEMORY = MemoryStorage()
 USER_STATE = UserState(MEMORY)
 CONVERSATION_STATE = ConversationState(MEMORY)
@@ -28,8 +36,8 @@ ADAPTER = Adapter(SETTINGS, CONVERSATION_STATE)
 
 # Create dialogs and Bot
 RECOGNIZER = MovieRecognizer(CONFIG.LUIS_APP_ID, CONFIG.LUIS_API_KEY, CONFIG.LUIS_API_HOST_NAME)
-DIALOG = MovieDialog(luis_recognizer=RECOGNIZER)
-BOT = MovieBot(CONVERSATION_STATE, USER_STATE, DIALOG)
+DIALOG = DeliveryDialog(USER_STATE)
+BOT = DeliveryBot(CONVERSATION_STATE, DIALOG, USER_STATE)
 
 AUTHORIZATION_HEADER = "Authorization"
 CONTENT_TYPE_HEADER = "Content-Type"

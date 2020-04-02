@@ -11,3 +11,6 @@ services:
       - "3978:3978"
     env_file:
       - compose.env
+
+  cosmos-db:
+    image: microsoft/azure-cosmosdb-emulator

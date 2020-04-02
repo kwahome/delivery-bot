@@ -1,3 +1,3 @@
-from .movie_bot import MovieBot
+from .delivery_bot import DeliveryBot
 
-__all__ = ["MovieBot"]
+__all__ = ["DeliveryBot"]
