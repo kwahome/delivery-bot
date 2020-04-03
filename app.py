@@ -1,4 +1,3 @@
-from adapters import Adapter
 from aiohttp import web
 from aiohttp.web import Request, Response
 # from botbuilder.azure import CosmosDbStorage, CosmosDbConfig
@@ -9,10 +8,11 @@ from botbuilder.core import (
     UserState
 )
 from botbuilder.schema import Activity
+
+from adapters import ErrorAdapter
 from bots import DeliveryBot
 from config import DefaultConfig
-from dialogs import DeliveryDialog
-from recognizers import MovieRecognizer
+from dialogs import MainDialog
 
 CONFIG = DefaultConfig()
 
@@ -32,11 +32,10 @@ CONVERSATION_STATE = ConversationState(MEMORY)
 
 # Create adapter.
 # See https://aka.ms/about-bot-adapter to learn more about how bots work.
-ADAPTER = Adapter(SETTINGS, CONVERSATION_STATE)
+ERROR_ADAPTER = ErrorAdapter(SETTINGS, CONVERSATION_STATE)
 
 # Create dialogs and Bot
-RECOGNIZER = MovieRecognizer(CONFIG.LUIS_APP_ID, CONFIG.LUIS_API_KEY, CONFIG.LUIS_API_HOST_NAME)
-DIALOG = DeliveryDialog(USER_STATE)
+DIALOG = MainDialog(USER_STATE, MEMORY)
 BOT = DeliveryBot(CONVERSATION_STATE, DIALOG, USER_STATE)
 
 AUTHORIZATION_HEADER = "Authorization"
@@ -56,7 +55,7 @@ async def messages(req: Request) -> Response:
     auth_header = req.headers[AUTHORIZATION_HEADER] if AUTHORIZATION_HEADER in req.headers else ""
 
     try:
-        await ADAPTER.process_activity(activity, auth_header, BOT.on_turn)
+        await ERROR_ADAPTER.process_activity(activity, auth_header, BOT.on_turn)
         return Response(status=201)
     except Exception as exception:
         raise exception

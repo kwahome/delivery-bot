@@ -1,3 +1,3 @@
-from .Delivery import Delivery, DeliveryList
+from .delivery import Delivery, DeliveryList
 
 __all__ = ["Delivery", "DeliveryList"]

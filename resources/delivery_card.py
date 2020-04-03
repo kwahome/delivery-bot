@@ -25,21 +25,21 @@ DeliveryCard = {
             "spacing": "None"
         }
     ],
-    "actions": [
-        {
-            "type": "Action.Submit",
-            "title": "Done",
-            "data": {
-                "x": "snooze"
-            },
-            "iconUrl": ""
-        },
-        {
-            "type": "Action.Submit",
-            "title": "Delete",
-            "data": {
-                "x": "late"
-            }
-        }
-    ]
+    # "actions": [
+    #     {
+    #         "type": "Action.Submit",
+    #         "title": "Done",
+    #         "data": {
+    #             "x": "snooze"
+    #         },
+    #         "iconUrl": ""
+    #     },
+    #     {
+    #         "type": "Action.Submit",
+    #         "title": "Delete",
+    #         "data": {
+    #             "x": "late"
+    #         }
+    #     }
+    # ]
 }
