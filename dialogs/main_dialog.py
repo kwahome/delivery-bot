@@ -43,9 +43,7 @@ class MainDialog(ComponentDialog):
 
     async def intro_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
         prompt_options = PromptOptions(
-                prompt=MessageFactory.text(
-                    "Howdie! How may I help you?"
-                ),
+                prompt=MessageFactory.text("How may I help you?"),
                 choices=[
                     Choice(Actions.CREATE_DELIVERY.value),
                     Choice(Actions.LIST_DELIVERIES.value),

@@ -4,29 +4,30 @@ from botbuilder.core import (
     UserState
 )
 from botbuilder.dialogs import (
-    ComponentDialog,
     DialogTurnResult,
     WaterfallDialog,
     WaterfallStepContext
 )
 from botbuilder.dialogs.prompts import (
+    ChoicePrompt,
+    ConfirmPrompt,
+    DateTimePrompt,
     PromptOptions,
     TextPrompt,
-    DateTimePrompt,
-    ChoicePrompt,
-    ConfirmPrompt
 )
 from botbuilder.schema import (
     ActivityTypes,
-    Activity
+    Activity,
+    InputHints
 )
 
+from .cancel_and_help_dialog import CancelAndHelpDialog
 from dialogs.constants import Dialog
 from domain.model import Delivery, DeliveryList
 from resources import DeliveryCard
 
 
-class CreateDeliveryDialog(ComponentDialog):
+class CreateDeliveryDialog(CancelAndHelpDialog):
     def __init__(self, user_state: UserState, storage: object):
         super(CreateDeliveryDialog, self).__init__(CreateDeliveryDialog.__name__)
 
@@ -54,40 +55,79 @@ class CreateDeliveryDialog(ComponentDialog):
         self.initial_dialog_id = Dialog.WATER_FALL_DIALOG_ID.value
 
     async def item_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
+        """
+        If a delivery item has not been provided, prompt for one.
+        :param step_context:
+        :return DialogTurnResult:
+        """
+
         # Create an object in which to collect the delivery information within the dialog.
         step_context.values[Dialog.DELIVERY_DIALOG_STATE_KEY.value] = Delivery()
 
-        prompt_options = PromptOptions(
-            prompt=MessageFactory.text(
-                "What would you like me to have delivered?"
+        delivery: Delivery = step_context.values[Dialog.DELIVERY_DIALOG_STATE_KEY.value]
+
+        if delivery.item is None:
+            message_text = f"What would you like me to have delivered?"
+            prompt_options = PromptOptions(
+                prompt=MessageFactory.text(
+                    message_text,
+                    message_text,
+                    InputHints.expecting_input
+                )
             )
-        )
-        return await step_context.prompt(TextPrompt.__name__, prompt_options)
+            return await step_context.prompt(TextPrompt.__name__, prompt_options)
+        return await step_context.next(delivery.item)
 
     async def destination_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
+        """
+        If a delivery destination has not been provided, prompt for one.
+        :param step_context:
+        :return DialogTurnResult:
+        """
         # Set the delivery item to what they entered in response to the create delivery prompt.
         delivery: Delivery = step_context.values[Dialog.DELIVERY_DIALOG_STATE_KEY.value]
+
+        # capture the response from the previous step
         delivery.item = step_context.result
 
-        prompt_options = PromptOptions(
-            prompt=MessageFactory.text(
-                f"Where do you want {delivery.item} delivered?"
+        if delivery.destination is None:
+            message_text = f"Where do you want {delivery.item.lower()} delivered?"
+            prompt_options = PromptOptions(
+                prompt=MessageFactory.text(
+                    message_text,
+                    message_text,
+                    InputHints.expecting_input
+                )
             )
-        )
-        return await step_context.prompt(TextPrompt.__name__, prompt_options)
+            return await step_context.prompt(TextPrompt.__name__, prompt_options)
+        return await step_context.next(delivery.destination)
 
     async def time_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
+        """
+        If a delivery time has not been provided, prompt for one.
+        :param step_context:
+        :return DialogTurnResult:
+        """
         # Set the delivery destination to what they entered in response to the destination prompt.
         delivery: Delivery = step_context.values[Dialog.DELIVERY_DIALOG_STATE_KEY.value]
+
+        # capture the response from the previous step
         delivery.destination = step_context.result
-        prompt_options = PromptOptions(
-            prompt=MessageFactory.text(
-                f"When do you want {delivery.item} delivered to {delivery.destination}?"
-            ),
-            retry_prompt=MessageFactory.text(
-                f"Please enter a valid time"
-            ),
-        )
+
+        if delivery.time is None:
+            message_text = f"""When do you want {delivery.item.lower()} delivered to 
+            {delivery.destination}?"""
+
+            prompt_options = PromptOptions(
+                prompt=MessageFactory.text(
+                    message_text,
+                    message_text,
+                    InputHints.expecting_input
+                ),
+                retry_prompt=MessageFactory.text(
+                    f"Please enter a valid time"
+                ),
+            )
 
         return await step_context.prompt(DateTimePrompt.__name__, prompt_options)
 
@@ -95,13 +135,13 @@ class CreateDeliveryDialog(ComponentDialog):
         # Set the delivery destination to what they entered in response to the destination prompt.
         delivery: Delivery = step_context.values[Dialog.DELIVERY_DIALOG_STATE_KEY.value]
 
+        # capture the response from the previous step
         delivery.time = step_context.result[0].value
 
+        message_text = f"""I have set the delivery. \nIs there anything else I can help with?"""
+
         prompt_options = PromptOptions(
-            prompt=MessageFactory.text(
-                f"""I have set the delivery. 
-                \nIs there anything else I can help with?"""
-            )
+            prompt=MessageFactory.text(message_text)
         )
 
         DeliveryCard["body"][0]["text"] = f"Item: {delivery.item}"
@@ -111,10 +151,7 @@ class CreateDeliveryDialog(ComponentDialog):
         await step_context.context.send_activity(
             Activity(
                 type=ActivityTypes.message,
-                text=MessageFactory.text(
-                    f"""I have set the delivery. 
-                    \nIs there anything else I can help with?"""
-                ),
+                text=MessageFactory.text(message_text),
                 attachments=[
                     CardFactory.adaptive_card(DeliveryCard)
                 ],
@@ -138,19 +175,19 @@ class CreateDeliveryDialog(ComponentDialog):
 
     async def _create_delivery(self, step_context):
         delivery: Delivery = step_context.values[Dialog.DELIVERY_DIALOG_STATE_KEY.value]
-        data = await self.storage.read(["DeliveryList"])
-        if "DeliveryList" not in data:
-            delivery_list = DeliveryList()
-            delivery_list.deliveries.append(delivery.__dict__)
-            delivery_list.turn_number = 1
+        data = await self.storage.read([Dialog.DELIVERY_LIST_STATE_KEY.value])
+        delivery_list: DeliveryList = data.get(Dialog.DELIVERY_LIST_STATE_KEY.value)
+        if delivery_list:
+            delivery_list.deliveries.append(delivery)
+            delivery_list.turn_number = delivery_list.turn_number + 1
         else:
-            delivery_list: DeliveryList = data["DeliveryList"]
-            delivery_list['deliveries'].append(delivery.__dict__)
-            delivery_list['turn_number'] = delivery_list['turn_number'] + 1
+            delivery_list = DeliveryList()
+            delivery_list.deliveries.append(delivery)
+            delivery_list.turn_number = 1
 
         try:
             record = {
-                "DeliveryList": delivery_list
+                Dialog.DELIVERY_LIST_STATE_KEY.value: delivery_list
             }
             await self.storage.write(record)
         except Exception as e:

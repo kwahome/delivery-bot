@@ -3,7 +3,6 @@ from botbuilder.core import (
     UserState
 )
 from botbuilder.dialogs import (
-    ComponentDialog,
     DialogTurnResult,
     WaterfallDialog,
     WaterfallStepContext
@@ -13,11 +12,13 @@ from botbuilder.schema import (
     Activity
 )
 
+from .cancel_and_help_dialog import CancelAndHelpDialog
 from dialogs.constants import Dialog
+from domain.model import Delivery, DeliveryList
 from resources import DeliveryCard
 
 
-class ListDeliveriesDialog(ComponentDialog):
+class ListDeliveriesDialog(CancelAndHelpDialog):
     def __init__(self, user_state: UserState, storage: object):
         super(ListDeliveriesDialog, self).__init__(ListDeliveriesDialog.__name__)
 
@@ -37,15 +38,14 @@ class ListDeliveriesDialog(ComponentDialog):
         self.initial_dialog_id = Dialog.WATER_FALL_DIALOG_ID.value
 
     async def list_deliveries(self, step_context: WaterfallStepContext) -> DialogTurnResult:
-        print("list")
-        data = await self.storage.read(["DeliveryList"])
-        print("data: ", data)
-        delivery_list = data.get("DeliveryList", {}).get("deliveries")
+        data = await self.storage.read([Dialog.DELIVERY_LIST_STATE_KEY.value])
+        delivery_list: DeliveryList = data.get(Dialog.DELIVERY_LIST_STATE_KEY.value)
         if delivery_list:
-            for delivery in delivery_list:
-                DeliveryCard["body"][0]["text"] = delivery['item']
-                DeliveryCard["body"][1]["text"] = delivery['destination']
-                DeliveryCard["body"][2]["text"] = delivery['time']
+            deliveries: [Delivery] = delivery_list.deliveries
+            for delivery in deliveries:
+                DeliveryCard["body"][0]["text"] = delivery.item
+                DeliveryCard["body"][1]["text"] = delivery.destination
+                DeliveryCard["body"][2]["text"] = delivery.time
                 message = Activity(
                     type=ActivityTypes.message,
                     attachments=[
