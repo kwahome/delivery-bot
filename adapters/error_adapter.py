@@ -10,7 +10,7 @@ from botbuilder.core import (
 from botbuilder.schema import ActivityTypes, Activity
 
 
-class Adapter(BotFrameworkAdapter):
+class ErrorAdapter(BotFrameworkAdapter):
 
     def __init__(
         self,
@@ -25,7 +25,10 @@ class Adapter(BotFrameworkAdapter):
             # This check writes out errors to console log
             # NOTE: In production environment, you should consider logging this to Azure
             #       application insights.
-            print(f"\n [on_turn_error] unhandled error: {error}", file=sys.stderr)
+            print(
+                f"\n[on_turn_error] unhandled error: '{error.__class__.__name__}: {str(error)}'",
+                file=sys.stderr
+            )
 
             # Send a message to the user
             await context.send_activity("The bot encountered an error or bug.")

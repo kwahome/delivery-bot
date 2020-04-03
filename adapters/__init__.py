@@ -1,3 +1,3 @@
-from .adapter import Adapter
+from .error_adapter import ErrorAdapter
 
-__all__ = ["Adapter"]
+__all__ = ["ErrorAdapter"]

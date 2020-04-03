@@ -5,4 +5,5 @@ botbuilder-ai>=4.7.1
 botbuilder-core>=4.7.1
 botbuilder-dialogs>=4.7.1
 flask>=1.0.3
+recognizers-text
 requests==2.22.0
