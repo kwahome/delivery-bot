@@ -166,14 +166,14 @@ class CreateDeliveryDialog(CancelAndHelpDialog):
         await self._create_delivery(step_context)
         if step_context.result:
             await step_context.context.send_activity(
-                MessageFactory.text("Goodbye!")
+                MessageFactory.text("Coolio. Goodbye!")
             )
+            return await step_context.continue_dialog()
         else:
             await step_context.context.send_activity(
                 MessageFactory.text("Happy to help!")
             )
             return await step_context.begin_dialog(self.id)
-        return await step_context.end_dialog()
 
     async def _create_delivery(self, step_context):
         recipient: ChannelAccount = step_context.context.activity.recipient

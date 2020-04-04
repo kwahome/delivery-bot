@@ -6,3 +6,4 @@ class Dialog(Enum):
     # Key name to store the deliveries dialogs state info in the StepContext
     DELIVERY_DIALOG_STATE_KEY: str = "value-deliveries"
     DELIVERY_LIST_STATE_KEY: str = "delivery-list"
+    SHOW_INTRO_PROMPT_KEY: str = "show-intro-prompt"

@@ -1,0 +1,248 @@
+{
+  "luis_schema_version": "4.0.0",
+  "versionId": "0.1",
+  "name": "DeliverySchedulingApp",
+  "desc": "",
+  "culture": "en-us",
+  "tokenizerVersion": "1.0.0",
+  "intents": [
+    {
+      "name": "Exit"
+    },
+    {
+      "name": "Greetings"
+    },
+    {
+      "name": "ListDeliveries"
+    },
+    {
+      "name": "None"
+    },
+    {
+      "name": "ScheduleDelivery"
+    }
+  ],
+  "entities": [],
+  "composites": [],
+  "closedLists": [],
+  "patternAnyEntities": [],
+  "regex_entities": [
+    {
+      "name": "ExitEntity",
+      "regexPattern": "^.*(bye|cancel|cool|end|exit|leave|okay|quit).*$",
+      "roles": []
+    },
+    {
+      "name": "GreetingsEntity",
+      "regexPattern": "^.*(|good morning|good afternoon|good evening|hello|hey|hi|how are you|what's up|yo).*$",
+      "roles": []
+    },
+    {
+      "name": "ListDeliveriesEntity",
+      "regexPattern": "^.*(deliveries|list|my deliveries|show).*$",
+      "roles": []
+    },
+    {
+      "name": "ScheduleDeliveryEntity",
+      "regexPattern": "^.*(add|create|new|schedule).*$",
+      "roles": []
+    }
+  ],
+  "prebuiltEntities": [],
+  "model_features": [],
+  "regex_features": [],
+  "patterns": [],
+  "utterances": [
+    {
+      "text": "0",
+      "intent": "None",
+      "entities": []
+    },
+    {
+      "text": "add delivery",
+      "intent": "ScheduleDelivery",
+      "entities": []
+    },
+    {
+      "text": "barking dogs are annoying",
+      "intent": "None",
+      "entities": []
+    },
+    {
+      "text": "bonjour",
+      "intent": "Greetings",
+      "entities": []
+    },
+    {
+      "text": "bye",
+      "intent": "Exit",
+      "entities": []
+    },
+    {
+      "text": "cancel",
+      "intent": "Exit",
+      "entities": []
+    },
+    {
+      "text": "cool",
+      "intent": "Exit",
+      "entities": []
+    },
+    {
+      "text": "create",
+      "intent": "ScheduleDelivery",
+      "entities": []
+    },
+    {
+      "text": "create delivery",
+      "intent": "ScheduleDelivery",
+      "entities": []
+    },
+    {
+      "text": "deliveries",
+      "intent": "ListDeliveries",
+      "entities": []
+    },
+    {
+      "text": "do i have deliveries?",
+      "intent": "ListDeliveries",
+      "entities": []
+    },
+    {
+      "text": "end",
+      "intent": "Exit",
+      "entities": []
+    },
+    {
+      "text": "exit",
+      "intent": "Exit",
+      "entities": []
+    },
+    {
+      "text": "giberrish",
+      "intent": "None",
+      "entities": []
+    },
+    {
+      "text": "good afternoon",
+      "intent": "Greetings",
+      "entities": []
+    },
+    {
+      "text": "good evening",
+      "intent": "Greetings",
+      "entities": []
+    },
+    {
+      "text": "good morning",
+      "intent": "Greetings",
+      "entities": []
+    },
+    {
+      "text": "goodbye",
+      "intent": "Exit",
+      "entities": []
+    },
+    {
+      "text": "hello",
+      "intent": "Greetings",
+      "entities": []
+    },
+    {
+      "text": "hey",
+      "intent": "Greetings",
+      "entities": []
+    },
+    {
+      "text": "hi",
+      "intent": "Greetings",
+      "entities": []
+    },
+    {
+      "text": "hola",
+      "intent": "Greetings",
+      "entities": []
+    },
+    {
+      "text": "how are you?",
+      "intent": "Greetings",
+      "entities": []
+    },
+    {
+      "text": "leave",
+      "intent": "Exit",
+      "entities": []
+    },
+    {
+      "text": "list",
+      "intent": "ListDeliveries",
+      "entities": []
+    },
+    {
+      "text": "list deliveries",
+      "intent": "ListDeliveries",
+      "entities": []
+    },
+    {
+      "text": "my deliveries",
+      "intent": "ListDeliveries",
+      "entities": []
+    },
+    {
+      "text": "new",
+      "intent": "ScheduleDelivery",
+      "entities": []
+    },
+    {
+      "text": "new delivery",
+      "intent": "ScheduleDelivery",
+      "entities": []
+    },
+    {
+      "text": "okay",
+      "intent": "Exit",
+      "entities": []
+    },
+    {
+      "text": "quit",
+      "intent": "Exit",
+      "entities": []
+    },
+    {
+      "text": "schedule",
+      "intent": "ScheduleDelivery",
+      "entities": []
+    },
+    {
+      "text": "schedule delivery",
+      "intent": "ScheduleDelivery",
+      "entities": []
+    },
+    {
+      "text": "show",
+      "intent": "ListDeliveries",
+      "entities": []
+    },
+    {
+      "text": "show deliveries",
+      "intent": "ListDeliveries",
+      "entities": []
+    },
+    {
+      "text": "what's up?",
+      "intent": "Greetings",
+      "entities": []
+    },
+    {
+      "text": "y'ello",
+      "intent": "Greetings",
+      "entities": []
+    },
+    {
+      "text": "yo",
+      "intent": "Greetings",
+      "entities": []
+    }
+  ],
+  "settings": []
+}
