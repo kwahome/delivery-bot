@@ -9,7 +9,8 @@ from botbuilder.dialogs import (
 )
 from botbuilder.schema import (
     ActivityTypes,
-    Activity
+    Activity,
+    ChannelAccount
 )
 
 from .cancel_and_help_dialog import CancelAndHelpDialog
@@ -38,8 +39,14 @@ class ListDeliveriesDialog(CancelAndHelpDialog):
         self.initial_dialog_id = Dialog.WATER_FALL_DIALOG_ID.value
 
     async def list_deliveries(self, step_context: WaterfallStepContext) -> DialogTurnResult:
-        data = await self.storage.read([Dialog.DELIVERY_LIST_STATE_KEY.value])
-        delivery_list: DeliveryList = data.get(Dialog.DELIVERY_LIST_STATE_KEY.value)
+        recipient: ChannelAccount = step_context.context.activity.recipient
+
+        data = await self.storage.read([recipient.id])
+
+        # get this member's state
+        member_state = data.get(recipient.id, {})
+
+        delivery_list: DeliveryList = member_state.get(Dialog.DELIVERY_LIST_STATE_KEY.value)
         if delivery_list:
             deliveries: [Delivery] = delivery_list.deliveries
             for delivery in deliveries:
@@ -55,5 +62,5 @@ class ListDeliveriesDialog(CancelAndHelpDialog):
                 await step_context.context.send_activity(message)
         else:
             await step_context.context.send_activity("You have no deliveries")
-        return await step_context.end_dialog()
+        return await step_context.continue_dialog()
 

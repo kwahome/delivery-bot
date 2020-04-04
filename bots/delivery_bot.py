@@ -46,7 +46,7 @@ class DeliveryBot(ActivityHandler):
         return await DialogHelper.run_dialog(
             self.dialog,
             turn_context,
-            self.conversation_state.create_property(DIALOG_STATE),
+            self.conversation_state.create_property(DIALOG_STATE)
         )
 
     async def on_members_added_activity(
@@ -57,7 +57,7 @@ class DeliveryBot(ActivityHandler):
         for member in members_added:
             if member.id != turn_context.activity.recipient.id:
                 await turn_context.send_activity(
-                    "Hello there! I'm the Deliveries-Bot."
+                    f"Hello there {member.name}! I'm the Deliveries-Bot."
                 )
         return await DialogHelper.run_dialog(
             self.dialog,

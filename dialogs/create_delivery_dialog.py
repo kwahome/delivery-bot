@@ -18,6 +18,7 @@ from botbuilder.dialogs.prompts import (
 from botbuilder.schema import (
     ActivityTypes,
     Activity,
+    ChannelAccount,
     InputHints
 )
 
@@ -138,7 +139,8 @@ class CreateDeliveryDialog(CancelAndHelpDialog):
         # capture the response from the previous step
         delivery.time = step_context.result[0].value
 
-        message_text = f"""I have set the delivery. \nIs there anything else I can help with?"""
+        message_text = f"""I have set the delivery of {delivery.item.lower()} to
+        {delivery.destination} at {delivery.time}. Is that all?"""
 
         prompt_options = PromptOptions(
             prompt=MessageFactory.text(message_text)
@@ -164,32 +166,42 @@ class CreateDeliveryDialog(CancelAndHelpDialog):
         await self._create_delivery(step_context)
         if step_context.result:
             await step_context.context.send_activity(
-                MessageFactory.text(":-)")
+                MessageFactory.text("Goodbye!")
             )
-            return await step_context.begin_dialog(self.id)
         else:
             await step_context.context.send_activity(
-                MessageFactory.text("Okay, goodbye!.")
+                MessageFactory.text("Happy to help!")
             )
+            return await step_context.begin_dialog(self.id)
         return await step_context.end_dialog()
 
     async def _create_delivery(self, step_context):
+        recipient: ChannelAccount = step_context.context.activity.recipient
         delivery: Delivery = step_context.values[Dialog.DELIVERY_DIALOG_STATE_KEY.value]
-        data = await self.storage.read([Dialog.DELIVERY_LIST_STATE_KEY.value])
-        delivery_list: DeliveryList = data.get(Dialog.DELIVERY_LIST_STATE_KEY.value)
+
+        data = await self.storage.read([recipient.id])
+
+        # get or initialize this member's state
+        member_state = data.get(recipient.id, {})
+        if not member_state:
+            member_state = {
+                recipient.id: {}
+            }
+
+        delivery_list: DeliveryList = member_state.get(Dialog.DELIVERY_LIST_STATE_KEY.value)
+
         if delivery_list:
             delivery_list.deliveries.append(delivery)
             delivery_list.turn_number = delivery_list.turn_number + 1
+
         else:
             delivery_list = DeliveryList()
             delivery_list.deliveries.append(delivery)
             delivery_list.turn_number = 1
+            member_state[recipient.id][Dialog.DELIVERY_LIST_STATE_KEY.value] = delivery_list
 
         try:
-            record = {
-                Dialog.DELIVERY_LIST_STATE_KEY.value: delivery_list
-            }
-            await self.storage.write(record)
+            await self.storage.write(member_state)
         except Exception as e:
             await step_context.context.send_activity(
                 f"Sorry, something went wrong storing your message! {str(e)}")

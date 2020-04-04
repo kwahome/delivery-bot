@@ -1,5 +1,12 @@
-from botbuilder.core import StatePropertyAccessor, TurnContext
-from botbuilder.dialogs import Dialog, DialogSet, DialogTurnStatus
+from botbuilder.core import (
+    StatePropertyAccessor,
+    TurnContext
+)
+from botbuilder.dialogs import (
+    Dialog,
+    DialogSet,
+    DialogTurnStatus
+)
 
 
 class DialogHelper:
@@ -9,7 +16,7 @@ class DialogHelper:
     async def run_dialog(
             dialog: Dialog,
             turn_context: TurnContext,
-            accessor: StatePropertyAccessor
+            accessor: StatePropertyAccessor,
     ):
         dialog_set = DialogSet(accessor)
         dialog_set.add(dialog)
