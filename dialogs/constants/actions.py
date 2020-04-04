@@ -2,6 +2,8 @@ from enum import Enum
 
 
 class Actions(Enum):
-    CREATE_DELIVERY: str = "Create delivery"
+    GREETINGS: str = "Greetings"
     EXIT: str = "Exit"
     LIST_DELIVERIES: str = "List deliveries"
+    SCHEDULE_DELIVERY: str = "Schedule delivery"
+    UNKNOWN: str = "Unknown"

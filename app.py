@@ -13,6 +13,7 @@ from adapters import ErrorAdapter
 from bots import DeliveryBot
 from config import DefaultConfig
 from dialogs import MainDialog
+from recognizers import DeliverySchedulingRecognizer
 
 CONFIG = DefaultConfig()
 
@@ -35,7 +36,8 @@ CONVERSATION_STATE = ConversationState(MEMORY)
 ERROR_ADAPTER = ErrorAdapter(SETTINGS, CONVERSATION_STATE)
 
 # Create dialogs and Bot
-DIALOG = MainDialog(USER_STATE, MEMORY)
+RECOGNIZER = DeliverySchedulingRecognizer(CONFIG)
+DIALOG = MainDialog(RECOGNIZER, USER_STATE, MEMORY)
 BOT = DeliveryBot(CONVERSATION_STATE, DIALOG, USER_STATE)
 
 AUTHORIZATION_HEADER = "Authorization"

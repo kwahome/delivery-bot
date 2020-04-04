@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Dict
 
 from botbuilder.core import (
     IntentScore,
@@ -6,8 +6,7 @@ from botbuilder.core import (
     TurnContext,
     RecognizerResult
 )
-from .enums import Intent
-from recognizers import MovieRecognizer
+from .constants import Intent
 
 
 def top_intent(intents: Dict[Intent, dict]) -> TopIntent:
@@ -37,7 +36,7 @@ def get_intent(recognizer_result: RecognizerResult) -> str:
 class LuisHelper:
     @staticmethod
     async def execute_luis_query(
-            luis_recognizer: MovieRecognizer,
+            luis_recognizer: object,
             turn_context: TurnContext
     ) -> (Intent, object):
         """
@@ -45,34 +44,11 @@ class LuisHelper:
         """
         result = None
         intent = None
+
         try:
             recognizer_result = await luis_recognizer.recognize(turn_context)
-            intent = get_intent(recognizer_result)
-
-            if intent == Intent.GENRE:
-                pass
-            elif intent == Intent.KEYWORD:
-                pass
-            elif intent == Intent.PERSON:
-                pass
-            elif intent == Intent.TITLE:
-                pass
-            else:
-                pass
-
+            intent = get_intent(recognizer_result=recognizer_result)
         except Exception as exception:
             print(exception)
+
         return intent, result
-
-
-# def update_result_entity(
-#         recognizer_result: RecognizerResult,
-#         result: IndentDetailsABS,
-#         entities_list: List[PayType]
-# ) -> None:
-#     for entity in entities_list:
-#         entity_found = recognizer_result.entities.get("$instance", {}).get(
-#             entity.value, [])
-#         if len(entity_found) > 0:
-#             result.update_entity(entity.value,
-#                                  entity_found[0]["text"].capitalize())
