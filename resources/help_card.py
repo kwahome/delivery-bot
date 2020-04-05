@@ -11,12 +11,12 @@ HelpCard = {
             "type": "FactSet",
             "facts": [
                 {
-                    "title": "Set Reminder:",
-                    "value": "Sets a reminder"
+                    "title": "Schedule Delivery:",
+                    "value": "Schedules a delivery"
                 },
                 {
-                    "title": "Show all Reminders:",
-                    "value": "Displays All reminders"
+                    "title": "List Deliveries:",
+                    "value": "Lists all deliveries"
                 },
                 {
                     "title": "Exit:",
