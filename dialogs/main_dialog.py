@@ -18,8 +18,8 @@ from botbuilder.schema import (
     InputHints
 )
 
-from dialogs.constants import Actions, Dialog
-from dialogs import CreateDeliveryDialog, ListDeliveriesDialog
+from dialogs.constants import Action, Keys, SalutationPhase
+from dialogs import CreateDeliveryDialog, ListDeliveriesDialog, SalutationDialog
 from helpers import LuisHelper
 from helpers.constants.intent import Intent
 from recognizers import DeliverySchedulingRecognizer
@@ -42,10 +42,11 @@ class MainDialog(ComponentDialog):
         self.add_dialog(ChoicePrompt(ChoicePrompt.__name__))
         self.add_dialog(CreateDeliveryDialog(self.user_state, self.storage))
         self.add_dialog(ListDeliveriesDialog(self.user_state, self.storage))
+        self.add_dialog(SalutationDialog(self.user_state, self.storage))
         self.add_dialog(TextPrompt(TextPrompt.__name__))
         self.add_dialog(
             WaterfallDialog(
-                Dialog.WATER_FALL_DIALOG_ID.value,
+                Keys.WATER_FALL_DIALOG_ID.value,
                 [
                     self.intro_step,
                     self.action_step,
@@ -54,28 +55,17 @@ class MainDialog(ComponentDialog):
             )
         )
 
-        self.initial_dialog_id = Dialog.WATER_FALL_DIALOG_ID.value
+        self.initial_dialog_id = Keys.WATER_FALL_DIALOG_ID.value
 
     async def intro_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
 
-        dialog_options: {} = step_context.options if step_context.options is not None else {}
-
-        show_intro_prompt = dialog_options.get(Dialog.SHOW_INTRO_PROMPT_KEY.value, False)
-
-        prompt_message_text = ""
-        prompt_choices = [
-            Choice(Actions.SCHEDULE_DELIVERY.value),
-            Choice(Actions.LIST_DELIVERIES.value),
-            Choice(Actions.EXIT.value)
-        ]
-        if show_intro_prompt:
-            prompt_message_text = f"How can I help you today?"
-
         prompt_options = PromptOptions(
-            prompt=MessageFactory.text(
-                prompt_message_text
-            ),
-            choices=prompt_choices
+            prompt=MessageFactory.text(""),
+            choices=[
+                Choice(Action.SCHEDULE_DELIVERY.value),
+                Choice(Action.LIST_DELIVERIES.value),
+                Choice(Action.EXIT.value)
+            ]
         )
 
         if not self.luis_recognizer.is_configured:
@@ -87,7 +77,7 @@ class MainDialog(ComponentDialog):
 
         if not self.luis_recognizer.is_configured:
             # LUIS is not configured, we just use the choice step
-            return await self._handle_choice(
+            return await self._handle_action(
                 step_context=step_context,
                 action=step_context.result.value
             )
@@ -98,43 +88,38 @@ class MainDialog(ComponentDialog):
             self.luis_recognizer, step_context.context
         )
 
-        if intent == Intent.GREETINGS.value:
-            return await self._handle_choice(
-                step_context=step_context,
-                action=Actions.GREETINGS.value
-            )
+        action: str = Action.UNKNOWN.value
+        if intent == Intent.SALUTATION.value:
+            action = Action.SALUTATION_ACKNOWLEDGEMENT.value
+
+        elif intent == Intent.SALUTATION_ACKNOWLEDGEMENT.value:
+            action = Action.ACTION_PROMPT.value
 
         elif intent == Intent.SCHEDULE_DELIVERY.value:
-            return await self._handle_choice(
-                step_context=step_context,
-                action=Actions.SCHEDULE_DELIVERY.value
-            )
+            action = Action.SCHEDULE_DELIVERY.value
 
         elif intent == Intent.LIST_DELIVERIES.value:
-            return await self._handle_choice(
-                step_context=step_context,
-                action=Actions.LIST_DELIVERIES.value
-            )
+            action = Action.LIST_DELIVERIES.value
 
         elif intent == Intent.CANCEL.value:
-            return await self._handle_choice(
-                step_context=step_context,
-                action=Actions.EXIT.value
-            )
-        else:
-            return await self._handle_choice(
-                step_context=step_context,
-                action=Actions.UNKNOWN.value
-            )
+            action = Action.EXIT.value
+
+        return await self._handle_action(step_context=step_context, action=action)
 
     async def final_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
-        return await step_context.replace_dialog(self.id)
+        if self.luis_recognizer.is_configured:
+            options = {
+                Keys.SHOW_INTRO_PROMPT.value: False
+            }
+            return await step_context.replace_dialog(self.id, options)
+        return await step_context.end_dialog(self.id)
 
     async def _handle_luis_not_configured(
-            self,
-            step_context: WaterfallStepContext,
-            prompt_options: PromptOptions
+        self,
+        step_context: WaterfallStepContext,
+        prompt_options: PromptOptions
     ):
+
         message_text = f"NOTE: LUIS is not configured."
         await step_context.context.send_activity(
             MessageFactory.text(
@@ -142,31 +127,41 @@ class MainDialog(ComponentDialog):
                 input_hint=InputHints.ignoring_input,
             )
         )
+
+        prompt_options.prompt = MessageFactory.text("How can I help you today?")
         return await step_context.prompt(ChoicePrompt.__name__, prompt_options)
 
-    async def _handle_choice(self, step_context: WaterfallStepContext, action: str):
+    async def _handle_action(self, step_context: WaterfallStepContext, action: str):
 
-        if action == Actions.GREETINGS.value:
-            message_text = f"Hello! How can I help you today?"
-            await step_context.context.send_activity(
-                MessageFactory.text(
-                    message_text,
-                    message_text,
-                    InputHints.ignoring_input
-                )
-            )
-            return await step_context.begin_dialog(MainDialog.__name__)
+        if action == Action.SALUTATION.value:
+            options = {
+                Keys.SALUTATION_PHASE.value: SalutationPhase.INITIATE
+            }
+            return await step_context.begin_dialog(SalutationDialog.__name__, options)
 
-        elif action == Actions.LIST_DELIVERIES.value:
+        elif action == Action.SALUTATION_ACKNOWLEDGEMENT.value:
+            options = {
+                Keys.SALUTATION_PHASE.value: SalutationPhase.ACKNOWLEDGE
+            }
+            return await step_context.begin_dialog(SalutationDialog.__name__, options)
+
+        elif action == Action.ACTION_PROMPT.value:
+            options = {
+                Keys.SALUTATION_PHASE.value: SalutationPhase.PROMPT
+            }
+            return await step_context.begin_dialog(SalutationDialog.__name__, options)
+
+        elif action == Action.LIST_DELIVERIES.value:
             return await step_context.begin_dialog(ListDeliveriesDialog.__name__)
 
-        elif action == Actions.EXIT.value:
+        elif action == Action.EXIT.value:
             await step_context.context.send_activity(MessageFactory.text("Goodbye!"))
+            return await step_context.replace_dialog(self.id)
 
-        elif action == Actions.SCHEDULE_DELIVERY.value:
+        elif action == Action.SCHEDULE_DELIVERY.value:
             return await step_context.begin_dialog(CreateDeliveryDialog.__name__)
 
-        elif action == Actions.UNKNOWN.value:
+        elif action == Action.UNKNOWN.value:
             message_text = f"Sorry, I didn't get that. Please try asking in a different way"
             await step_context.context.send_activity(
                 MessageFactory.text(
@@ -176,7 +171,7 @@ class MainDialog(ComponentDialog):
                 )
             )
             options = {
-                Dialog.SHOW_INTRO_PROMPT_KEY.value: False
+                Keys.SHOW_INTRO_PROMPT.value: False
             }
             return await step_context.begin_dialog(MainDialog.__name__, options)
         return await step_context.end_dialog(self.id)

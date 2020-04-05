@@ -14,7 +14,7 @@ from botbuilder.schema import (
 )
 
 from .cancel_and_help_dialog import CancelAndHelpDialog
-from dialogs.constants import Dialog
+from dialogs.constants import Keys
 from domain.model import Delivery, DeliveryList
 from resources import DeliveryCard
 
@@ -29,14 +29,14 @@ class ListDeliveriesDialog(CancelAndHelpDialog):
 
         self.add_dialog(
             WaterfallDialog(
-                Dialog.WATER_FALL_DIALOG_ID.value,
+                Keys.WATER_FALL_DIALOG_ID.value,
                 [
                     self.list_deliveries,
                 ],
             )
         )
 
-        self.initial_dialog_id = Dialog.WATER_FALL_DIALOG_ID.value
+        self.initial_dialog_id = Keys.WATER_FALL_DIALOG_ID.value
 
     async def list_deliveries(self, step_context: WaterfallStepContext) -> DialogTurnResult:
         recipient: ChannelAccount = step_context.context.activity.recipient
@@ -46,7 +46,7 @@ class ListDeliveriesDialog(CancelAndHelpDialog):
         # get this member's state
         member_state = data.get(recipient.id, {})
 
-        delivery_list: DeliveryList = member_state.get(Dialog.DELIVERY_LIST_STATE_KEY.value)
+        delivery_list: DeliveryList = member_state.get(Keys.DELIVERY_LIST_STATE.value)
         if delivery_list:
             deliveries: [Delivery] = delivery_list.deliveries
             for delivery in deliveries:

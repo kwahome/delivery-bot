@@ -1,22 +1,25 @@
 {
   "luis_schema_version": "4.0.0",
   "versionId": "0.1",
-  "name": "DeliverySchedulingApp",
+  "name": "DeliveryScheduling",
   "desc": "",
   "culture": "en-us",
   "tokenizerVersion": "1.0.0",
   "intents": [
     {
-      "name": "Exit"
-    },
-    {
-      "name": "Greetings"
+      "name": "Cancel"
     },
     {
       "name": "ListDeliveries"
     },
     {
       "name": "None"
+    },
+    {
+      "name": "Salutation"
+    },
+    {
+      "name": "SalutationAcknowledgement"
     },
     {
       "name": "ScheduleDelivery"
@@ -29,17 +32,22 @@
   "regex_entities": [
     {
       "name": "ExitEntity",
-      "regexPattern": "^.*(bye|cancel|cool|end|exit|leave|okay|quit).*$",
-      "roles": []
-    },
-    {
-      "name": "GreetingsEntity",
-      "regexPattern": "^.*(|good morning|good afternoon|good evening|hello|hey|hi|how are you|what's up|yo).*$",
+      "regexPattern": "^.*(bye|cancel|end|exit|leave|quit).*$",
       "roles": []
     },
     {
       "name": "ListDeliveriesEntity",
       "regexPattern": "^.*(deliveries|list|my deliveries|show).*$",
+      "roles": []
+    },
+    {
+      "name": "SalutationAcknowledgementEntity",
+      "regexPattern": "^.*(i'm fine|i am fine|i'm alright|i am alright|i'm okay|i am okay|i'm well|i am well|i have never been better|never been better|i'm cool|i am cool).*$",
+      "roles": []
+    },
+    {
+      "name": "SalutationEntity",
+      "regexPattern": "^.*(|good morning|good afternoon|good evening|hello|hey|hi|how are you?|how are you doing?|hello how are you doing?|what's up|yo|howdie).*$",
       "roles": []
     },
     {
@@ -70,22 +78,17 @@
     },
     {
       "text": "bonjour",
-      "intent": "Greetings",
+      "intent": "Salutation",
       "entities": []
     },
     {
       "text": "bye",
-      "intent": "Exit",
+      "intent": "Cancel",
       "entities": []
     },
     {
       "text": "cancel",
-      "intent": "Exit",
-      "entities": []
-    },
-    {
-      "text": "cool",
-      "intent": "Exit",
+      "intent": "Cancel",
       "entities": []
     },
     {
@@ -110,12 +113,12 @@
     },
     {
       "text": "end",
-      "intent": "Exit",
+      "intent": "Cancel",
       "entities": []
     },
     {
       "text": "exit",
-      "intent": "Exit",
+      "intent": "Cancel",
       "entities": []
     },
     {
@@ -125,52 +128,97 @@
     },
     {
       "text": "good afternoon",
-      "intent": "Greetings",
+      "intent": "Salutation",
       "entities": []
     },
     {
       "text": "good evening",
-      "intent": "Greetings",
+      "intent": "Salutation",
       "entities": []
     },
     {
       "text": "good morning",
-      "intent": "Greetings",
+      "intent": "Salutation",
       "entities": []
     },
     {
       "text": "goodbye",
-      "intent": "Exit",
+      "intent": "Cancel",
       "entities": []
     },
     {
       "text": "hello",
-      "intent": "Greetings",
+      "intent": "Salutation",
+      "entities": []
+    },
+    {
+      "text": "hello how are you doing?",
+      "intent": "Salutation",
       "entities": []
     },
     {
       "text": "hey",
-      "intent": "Greetings",
+      "intent": "Salutation",
       "entities": []
     },
     {
       "text": "hi",
-      "intent": "Greetings",
+      "intent": "Salutation",
       "entities": []
     },
     {
       "text": "hola",
-      "intent": "Greetings",
+      "intent": "Salutation",
       "entities": []
     },
     {
       "text": "how are you?",
-      "intent": "Greetings",
+      "intent": "Salutation",
+      "entities": []
+    },
+    {
+      "text": "i am cool",
+      "intent": "SalutationAcknowledgement",
+      "entities": []
+    },
+    {
+      "text": "i am okay",
+      "intent": "SalutationAcknowledgement",
+      "entities": []
+    },
+    {
+      "text": "i am well",
+      "intent": "SalutationAcknowledgement",
+      "entities": []
+    },
+    {
+      "text": "i'm alright",
+      "intent": "SalutationAcknowledgement",
+      "entities": []
+    },
+    {
+      "text": "i'm cool",
+      "intent": "SalutationAcknowledgement",
+      "entities": []
+    },
+    {
+      "text": "i'm fine",
+      "intent": "SalutationAcknowledgement",
+      "entities": []
+    },
+    {
+      "text": "i'm okay",
+      "intent": "SalutationAcknowledgement",
+      "entities": []
+    },
+    {
+      "text": "i'm well",
+      "intent": "SalutationAcknowledgement",
       "entities": []
     },
     {
       "text": "leave",
-      "intent": "Exit",
+      "intent": "Cancel",
       "entities": []
     },
     {
@@ -199,13 +247,8 @@
       "entities": []
     },
     {
-      "text": "okay",
-      "intent": "Exit",
-      "entities": []
-    },
-    {
       "text": "quit",
-      "intent": "Exit",
+      "intent": "Cancel",
       "entities": []
     },
     {
@@ -230,17 +273,17 @@
     },
     {
       "text": "what's up?",
-      "intent": "Greetings",
+      "intent": "Salutation",
       "entities": []
     },
     {
       "text": "y'ello",
-      "intent": "Greetings",
+      "intent": "Salutation",
       "entities": []
     },
     {
       "text": "yo",
-      "intent": "Greetings",
+      "intent": "Salutation",
       "entities": []
     }
   ],

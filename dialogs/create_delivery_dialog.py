@@ -23,7 +23,7 @@ from botbuilder.schema import (
 )
 
 from .cancel_and_help_dialog import CancelAndHelpDialog
-from dialogs.constants import Dialog
+from dialogs.constants import Keys
 from domain.model import Delivery, DeliveryList
 from resources import DeliveryCard
 
@@ -42,7 +42,7 @@ class CreateDeliveryDialog(CancelAndHelpDialog):
         self.add_dialog(ConfirmPrompt(ConfirmPrompt.__name__))
         self.add_dialog(
             WaterfallDialog(
-                Dialog.WATER_FALL_DIALOG_ID.value,
+                Keys.WATER_FALL_DIALOG_ID.value,
                 [
                     self.item_step,
                     self.destination_step,
@@ -53,7 +53,7 @@ class CreateDeliveryDialog(CancelAndHelpDialog):
             )
         )
 
-        self.initial_dialog_id = Dialog.WATER_FALL_DIALOG_ID.value
+        self.initial_dialog_id = Keys.WATER_FALL_DIALOG_ID.value
 
     async def item_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
         """
@@ -63,9 +63,9 @@ class CreateDeliveryDialog(CancelAndHelpDialog):
         """
 
         # Create an object in which to collect the delivery information within the dialog.
-        step_context.values[Dialog.DELIVERY_DIALOG_STATE_KEY.value] = Delivery()
+        step_context.values[Keys.DELIVERY_DIALOG_STATE.value] = Delivery()
 
-        delivery: Delivery = step_context.values[Dialog.DELIVERY_DIALOG_STATE_KEY.value]
+        delivery: Delivery = step_context.values[Keys.DELIVERY_DIALOG_STATE.value]
 
         if delivery.item is None:
             message_text = f"What would you like me to have delivered?"
@@ -86,7 +86,7 @@ class CreateDeliveryDialog(CancelAndHelpDialog):
         :return DialogTurnResult:
         """
         # Set the delivery item to what they entered in response to the create delivery prompt.
-        delivery: Delivery = step_context.values[Dialog.DELIVERY_DIALOG_STATE_KEY.value]
+        delivery: Delivery = step_context.values[Keys.DELIVERY_DIALOG_STATE.value]
 
         # capture the response from the previous step
         delivery.item = step_context.result
@@ -110,7 +110,7 @@ class CreateDeliveryDialog(CancelAndHelpDialog):
         :return DialogTurnResult:
         """
         # Set the delivery destination to what they entered in response to the destination prompt.
-        delivery: Delivery = step_context.values[Dialog.DELIVERY_DIALOG_STATE_KEY.value]
+        delivery: Delivery = step_context.values[Keys.DELIVERY_DIALOG_STATE.value]
 
         # capture the response from the previous step
         delivery.destination = step_context.result
@@ -134,7 +134,7 @@ class CreateDeliveryDialog(CancelAndHelpDialog):
 
     async def confirm_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
         # Set the delivery destination to what they entered in response to the destination prompt.
-        delivery: Delivery = step_context.values[Dialog.DELIVERY_DIALOG_STATE_KEY.value]
+        delivery: Delivery = step_context.values[Keys.DELIVERY_DIALOG_STATE.value]
 
         # capture the response from the previous step
         delivery.time = step_context.result[0].value
@@ -177,7 +177,7 @@ class CreateDeliveryDialog(CancelAndHelpDialog):
 
     async def _create_delivery(self, step_context):
         recipient: ChannelAccount = step_context.context.activity.recipient
-        delivery: Delivery = step_context.values[Dialog.DELIVERY_DIALOG_STATE_KEY.value]
+        delivery: Delivery = step_context.values[Keys.DELIVERY_DIALOG_STATE.value]
 
         data = await self.storage.read([recipient.id])
 
@@ -188,7 +188,7 @@ class CreateDeliveryDialog(CancelAndHelpDialog):
                 recipient.id: {}
             }
 
-        delivery_list: DeliveryList = member_state.get(Dialog.DELIVERY_LIST_STATE_KEY.value)
+        delivery_list: DeliveryList = member_state.get(Keys.DELIVERY_LIST_STATE.value)
 
         if delivery_list:
             delivery_list.deliveries.append(delivery)
@@ -198,7 +198,7 @@ class CreateDeliveryDialog(CancelAndHelpDialog):
             delivery_list = DeliveryList()
             delivery_list.deliveries.append(delivery)
             delivery_list.turn_number = 1
-            member_state[recipient.id][Dialog.DELIVERY_LIST_STATE_KEY.value] = delivery_list
+            member_state[recipient.id][Keys.DELIVERY_LIST_STATE.value] = delivery_list
 
         try:
             await self.storage.write(member_state)

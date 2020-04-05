@@ -13,14 +13,9 @@ from botbuilder.core import (
     CardFactory,
     MessageFactory
 )
+
+from dialogs.constants import Prompts
 from resources import HelpCard
-
-
-CANCEL = "cancel"
-END = "end"
-HELP = "help"
-QUESTION_MARK = "?"
-QUIT = "quit"
 
 
 class CancelAndHelpDialog(ComponentDialog):
@@ -44,11 +39,11 @@ class CancelAndHelpDialog(ComponentDialog):
                 ]
             )
 
-            if text in (HELP, QUESTION_MARK):
+            if text in (Prompts.HELP.value, Prompts.QUESTION_MARK.value):
                 await inner_dc.context.send_activity(message)
                 return DialogTurnResult(DialogTurnStatus.Waiting)
 
-            if text in (CANCEL, QUIT):
+            if text in (Prompts.CANCEL.value, Prompts.END.value, Prompts.QUIT.value):
                 cancel_message_text = "Cancelled."
                 cancel_message = MessageFactory.text(
                     cancel_message_text, cancel_message_text, InputHints.ignoring_input
