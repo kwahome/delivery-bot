@@ -4,7 +4,6 @@ from botbuilder.core import (
 )
 from botbuilder.dialogs import (
     Choice,
-    ComponentDialog,
     DialogTurnResult,
     WaterfallDialog,
     WaterfallStepContext
@@ -19,13 +18,18 @@ from botbuilder.schema import (
 )
 
 from dialogs.constants import Action, Keys, SalutationPhase
-from dialogs import CreateDeliveryDialog, ListDeliveriesDialog, SalutationDialog
+from dialogs import (
+    CancelAndHelpDialog,
+    CreateDeliveryDialog,
+    ListDeliveriesDialog,
+    SalutationDialog
+)
 from helpers import LuisHelper
 from helpers.constants.intent import Intent
 from recognizers import DeliverySchedulingRecognizer
 
 
-class MainDialog(ComponentDialog):
+class MainDialog(CancelAndHelpDialog):
     def __init__(
             self,
             luis_recognizer: DeliverySchedulingRecognizer,
@@ -68,7 +72,7 @@ class MainDialog(ComponentDialog):
             ]
         )
 
-        if not self.luis_recognizer.is_configured:
+        if not self.luis_recognizer.is_configured or self.luis_recognizer.luis_is_disabled:
             return await self._handle_luis_not_configured(step_context, prompt_options)
 
         return await step_context.prompt(TextPrompt.__name__, prompt_options)
@@ -107,11 +111,8 @@ class MainDialog(ComponentDialog):
         return await self._handle_action(step_context=step_context, action=action)
 
     async def final_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
-        if self.luis_recognizer.is_configured:
-            options = {
-                Keys.SHOW_INTRO_PROMPT.value: False
-            }
-            return await step_context.replace_dialog(self.id, options)
+        if self.luis_recognizer.is_configured and not self.luis_recognizer.luis_is_disabled:
+            return await step_context.replace_dialog(self.id)
         return await step_context.end_dialog(self.id)
 
     async def _handle_luis_not_configured(
@@ -120,7 +121,7 @@ class MainDialog(ComponentDialog):
         prompt_options: PromptOptions
     ):
 
-        message_text = f"NOTE: LUIS is not configured."
+        message_text = f"NOTE: LUIS is not configured or is disabled."
         await step_context.context.send_activity(
             MessageFactory.text(
                 text=message_text,
@@ -175,4 +176,3 @@ class MainDialog(ComponentDialog):
             }
             return await step_context.begin_dialog(MainDialog.__name__, options)
         return await step_context.end_dialog(self.id)
-

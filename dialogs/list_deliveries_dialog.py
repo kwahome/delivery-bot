@@ -62,5 +62,5 @@ class ListDeliveriesDialog(CancelAndHelpDialog):
                 await step_context.context.send_activity(message)
         else:
             await step_context.context.send_activity("You have no deliveries")
-        return await step_context.continue_dialog()
+        return await step_context.end_dialog()
 

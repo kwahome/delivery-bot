@@ -15,12 +15,13 @@ class DeliverySchedulingRecognizer(Recognizer):
     def __init__(self, configuration: DefaultConfig):
         self._recognizer = None
 
-        luis_is_configured = (
+        self.luis_is_disabled = configuration.LUIS_IS_DISABLED
+        self.luis_is_configured = (
             configuration.LUIS_APP_ID
             and configuration.LUIS_API_KEY
             and configuration.LUIS_API_HOST_NAME
         )
-        if luis_is_configured:
+        if self.luis_is_configured:
             # Set the recognizer options depending on which endpoint version you want to use e.g
             # v2 or v3.
             luis_application = LuisApplication(
