@@ -49,5 +49,6 @@ class CancelAndHelpDialog(ComponentDialog):
                     cancel_message_text, cancel_message_text, InputHints.ignoring_input
                 )
                 await inner_dc.context.send_activity(cancel_message)
-                return await inner_dc.cancel_all_dialogs()
+                await inner_dc.cancel_all_dialogs()
+                return await inner_dc.replace_dialog(self.initial_dialog_id)
         return None

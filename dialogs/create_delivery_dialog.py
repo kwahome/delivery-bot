@@ -168,7 +168,7 @@ class CreateDeliveryDialog(CancelAndHelpDialog):
             await step_context.context.send_activity(
                 MessageFactory.text("Coolio. Goodbye!")
             )
-            return await step_context.continue_dialog()
+            return await step_context.end_dialog()
         else:
             await step_context.context.send_activity(
                 MessageFactory.text("Happy to help!")

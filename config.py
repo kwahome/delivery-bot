@@ -18,6 +18,8 @@ class DefaultConfig:
         "LUIS_API_HOST_NAME", "westeurope.api.cognitive.microsoft.com"
     )
 
+    LUIS_IS_DISABLED = True if os.environ.get("LUIS_IS_DISABLED", "False") == "True" else False
+
     # cosmos storage
     COSMOS_DB_SERVICE_ENDPOINT = os.environ.get("COSMOS_DB_SERVICE_ENDPOINT", "")
     COSMOS_DB_KEY = os.environ.get("COSMOS_DB_KEY", "")
