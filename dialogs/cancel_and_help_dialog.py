@@ -15,7 +15,8 @@ from botbuilder.core import (
 )
 
 from dialogs.constants import Prompts
-from resources import HelpCard
+from resources import HelpCard, messages
+from utils.logging import LOGGER
 
 
 class CancelAndHelpDialog(ComponentDialog):
@@ -23,6 +24,8 @@ class CancelAndHelpDialog(ComponentDialog):
         super(CancelAndHelpDialog, self).__init__(dialog_id)
 
     async def on_continue_dialog(self, inner_dc: DialogContext) -> DialogTurnResult:
+        LOGGER.debug(msg=f"{CancelAndHelpDialog.__name__}: on_continue_dialog")
+
         result = await self.interrupt(inner_dc)
         if result is not None:
             return result
@@ -30,6 +33,8 @@ class CancelAndHelpDialog(ComponentDialog):
         return await super(CancelAndHelpDialog, self).on_continue_dialog(inner_dc)
 
     async def interrupt(self, inner_dc: DialogContext) -> DialogTurnResult:
+        LOGGER.debug(msg=f"{CancelAndHelpDialog.__name__}: interrupt")
+
         if inner_dc.context.activity.type == ActivityTypes.message:
             text = inner_dc.context.activity.text.lower()
             message = Activity(
@@ -44,9 +49,8 @@ class CancelAndHelpDialog(ComponentDialog):
                 return DialogTurnResult(DialogTurnStatus.Waiting)
 
             if text in (Prompts.CANCEL.value, Prompts.END.value, Prompts.QUIT.value):
-                cancel_message_text = "Cancelled."
                 cancel_message = MessageFactory.text(
-                    cancel_message_text, cancel_message_text, InputHints.ignoring_input
+                    messages.CANCELLED, messages.CANCELLED, InputHints.ignoring_input
                 )
                 await inner_dc.context.send_activity(cancel_message)
                 await inner_dc.cancel_all_dialogs()

@@ -1,4 +1,3 @@
-import sys
 from datetime import datetime
 
 from botbuilder.core import (
@@ -8,6 +7,9 @@ from botbuilder.core import (
     TurnContext,
 )
 from botbuilder.schema import ActivityTypes, Activity
+
+from resources import messages
+from utils.logging import LOGGER
 
 
 class ErrorAdapter(BotFrameworkAdapter):
@@ -25,16 +27,13 @@ class ErrorAdapter(BotFrameworkAdapter):
             # This check writes out errors to console log
             # NOTE: In production environment, you should consider logging this to Azure
             #       application insights.
-            print(
-                f"\n[on_turn_error] unhandled error: '{error.__class__.__name__}: {str(error)}'",
-                file=sys.stderr
+            LOGGER.error(
+                msg=f"An unhandled error has occurred: '{error.__class__.__name__}: {str(error)}'"
             )
 
             # Send a message to the user
-            await context.send_activity("The bot encountered an error or bug.")
-            await context.send_activity(
-                "To continue to run this bot, please fix the bot source code."
-            )
+            await context.send_activity(messages.SOMETHING_WENT_WRONG)
+
             # Send a trace activity if we're talking to the Bot Framework Emulator
             if context.activity.channel_id == "emulator":
                 # Create a trace activity that contains the error object

@@ -13,6 +13,8 @@ from botbuilder.schema import (
 
 from .cancel_and_help_dialog import CancelAndHelpDialog
 from dialogs.constants import Keys, SalutationPhase
+from resources import messages
+from utils.logging import LOGGER
 
 
 class SalutationDialog(CancelAndHelpDialog):
@@ -35,6 +37,8 @@ class SalutationDialog(CancelAndHelpDialog):
         self.initial_dialog_id = Keys.WATER_FALL_DIALOG_ID.value
 
     async def salute(self, step_context: WaterfallStepContext) -> DialogTurnResult:
+        LOGGER.debug(msg=f"{SalutationDialog.__name__}: salute")
+
         dialog_options: {} = step_context.options if step_context.options is not None else {}
 
         salutation_phase: SalutationPhase = dialog_options.get(
@@ -43,13 +47,13 @@ class SalutationDialog(CancelAndHelpDialog):
 
         message_text = f""
         if salutation_phase == SalutationPhase.INITIATE:
-            message_text = f"Hello! How are you doing?"
+            message_text = f"{messages.HELLO}! {messages.HOW_ARE_YOU_DOING}"
 
         elif salutation_phase == SalutationPhase.ACKNOWLEDGE:
-            message_text = f"I am fine thank you. How can I help you today?"
+            message_text = f"{messages.SALUTATION_ACKNOWLEDGEMENT}. {messages.HOW_CAN_I_HELP}"
 
         elif salutation_phase == SalutationPhase.PROMPT:
-            message_text = f"How may I help you today?"
+            message_text = f"{messages.HOW_CAN_I_HELP}"
 
         await step_context.context.send_activity(
             MessageFactory.text(

@@ -6,8 +6,11 @@ from botbuilder.core import (
 )
 from botbuilder.dialogs import Dialog
 from botbuilder.schema import ChannelAccount
-from helpers.dialog_helper import DialogHelper
 from typing import List
+
+from helpers.dialog_helper import DialogHelper
+from resources import messages
+from utils.logging import LOGGER
 
 
 DIALOG_STATE = "DialogState"
@@ -24,13 +27,19 @@ class DeliveryBot(ActivityHandler):
             user_state: UserState,
     ):
         if conversation_state is None:
-            raise Exception(
-                "[DeliveryBot]: Missing parameter. conversation_state is required"
-            )
+            error = "Missing parameter. conversation_state is required"
+            LOGGER.error(msg=error)
+            raise Exception(f"[DeliveryBot]: {error}")
+
         if user_state is None:
-            raise Exception("[DeliveryBot]: Missing parameter. user_state is required")
+            error = "Missing parameter. user_state is required"
+            LOGGER.error(msg=error)
+            raise Exception(f"[DeliveryBot]: {error}")
+
         if dialog is None:
-            raise Exception("[DeliveryBot]: Missing parameter. dialog is required")
+            error = "Missing parameter. dialog is required"
+            LOGGER.error(msg=error)
+            raise Exception(f"[DeliveryBot]: {error}")
 
         self.conversation_state = conversation_state
         self.dialog = dialog
@@ -43,6 +52,7 @@ class DeliveryBot(ActivityHandler):
         await self.user_state.save_changes(turn_context, False)
 
     async def on_message_activity(self, turn_context: TurnContext):
+        LOGGER.debug(f"Message activity received. Context={turn_context}")
         return await DialogHelper.run_dialog(
             self.dialog,
             turn_context,
@@ -57,8 +67,9 @@ class DeliveryBot(ActivityHandler):
         for member in members_added:
             if member.id != turn_context.activity.recipient.id:
                 await turn_context.send_activity(
-                    f"Hello there {member.name}! I'm the Deliveries-Bot."
+                    f"{messages.HELLO} {member.name}! {messages.BOT_INTRO_TEXT}."
                 )
+                LOGGER.debug(f"Welcome message sent to member='{member.id}'")
         return await DialogHelper.run_dialog(
             self.dialog,
             turn_context,
