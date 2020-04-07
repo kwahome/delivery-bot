@@ -14,6 +14,7 @@ from bots import DeliveryBot
 from config import DefaultConfig
 from dialogs import MainDialog
 from recognizers import DeliverySchedulingRecognizer
+from utils.logging import LOGGER
 
 CONFIG = DefaultConfig()
 
@@ -60,6 +61,7 @@ async def messages(req: Request) -> Response:
         await ERROR_ADAPTER.process_activity(activity, auth_header, BOT.on_turn)
         return Response(status=201)
     except Exception as exception:
+        LOGGER.error(msg=f"An unexpected exception={exception} has occurred")
         raise exception
 
 
@@ -68,6 +70,9 @@ APP.router.add_post("/api/messages", messages)
 
 if __name__ == "__main__":
     try:
+        LOGGER.info(msg=f"Starting application at host='{CONFIG.HOST}' on port={CONFIG.PORT}")
+
         web.run_app(APP, host=CONFIG.HOST, port=CONFIG.PORT)
     except Exception as error:
+        LOGGER.error(msg=f"Application initialization failed with an error={error}")
         raise error

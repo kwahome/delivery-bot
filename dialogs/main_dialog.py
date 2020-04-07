@@ -17,16 +17,17 @@ from botbuilder.schema import (
     InputHints
 )
 
-from dialogs.constants import Action, Keys, SalutationPhase
 from dialogs import (
     CancelAndHelpDialog,
     CreateDeliveryDialog,
     ListDeliveriesDialog,
     SalutationDialog
 )
-from helpers import LuisHelper
+from dialogs.constants import Action, Keys, SalutationPhase
 from helpers.constants.intent import Intent
 from recognizers import DeliverySchedulingRecognizer
+from resources import messages
+from utils.logging import LOGGER
 
 
 class MainDialog(CancelAndHelpDialog):
@@ -62,6 +63,7 @@ class MainDialog(CancelAndHelpDialog):
         self.initial_dialog_id = Keys.WATER_FALL_DIALOG_ID.value
 
     async def intro_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
+        LOGGER.debug(msg=f"Main dialog intro step")
 
         prompt_options = PromptOptions(
             prompt=MessageFactory.text(""),
@@ -78,6 +80,7 @@ class MainDialog(CancelAndHelpDialog):
         return await step_context.prompt(TextPrompt.__name__, prompt_options)
 
     async def action_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
+        LOGGER.debug(msg="Main dialog action step")
 
         if not self.luis_recognizer.is_configured:
             # LUIS is not configured, we just use the choice step
@@ -88,9 +91,7 @@ class MainDialog(CancelAndHelpDialog):
 
         # Call LUIS and gather any potential delivery details.
         # (Note the TurnContext has the response to the prompt.)
-        intent, luis_result = await LuisHelper.execute_luis_query(
-            self.luis_recognizer, step_context.context
-        )
+        intent, luis_result = await self.luis_recognizer.recognize(step_context.context)
 
         action: str = Action.UNKNOWN.value
         if intent == Intent.SALUTATION.value:
@@ -120,16 +121,14 @@ class MainDialog(CancelAndHelpDialog):
         step_context: WaterfallStepContext,
         prompt_options: PromptOptions
     ):
-
-        message_text = f"NOTE: LUIS is not configured or is disabled."
         await step_context.context.send_activity(
             MessageFactory.text(
-                text=message_text,
+                text=messages.LUIS_NOT_CONFIGURED_WARNING,
                 input_hint=InputHints.ignoring_input,
             )
         )
 
-        prompt_options.prompt = MessageFactory.text("How can I help you today?")
+        prompt_options.prompt = MessageFactory.text(messages.HOW_CAN_I_HELP)
         return await step_context.prompt(ChoicePrompt.__name__, prompt_options)
 
     async def _handle_action(self, step_context: WaterfallStepContext, action: str):
@@ -156,18 +155,17 @@ class MainDialog(CancelAndHelpDialog):
             return await step_context.begin_dialog(ListDeliveriesDialog.__name__)
 
         elif action == Action.EXIT.value:
-            await step_context.context.send_activity(MessageFactory.text("Goodbye!"))
+            await step_context.context.send_activity(MessageFactory.text(messages.GOODBYE))
             return await step_context.replace_dialog(self.id)
 
         elif action == Action.SCHEDULE_DELIVERY.value:
             return await step_context.begin_dialog(CreateDeliveryDialog.__name__)
 
         elif action == Action.UNKNOWN.value:
-            message_text = f"Sorry, I didn't get that. Please try asking in a different way"
             await step_context.context.send_activity(
                 MessageFactory.text(
-                    message_text,
-                    message_text,
+                    messages.BOT_DID_NOT_UNDERSTAND,
+                    messages.BOT_DID_NOT_UNDERSTAND,
                     InputHints.ignoring_input
                 )
             )
